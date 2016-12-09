@@ -14,6 +14,7 @@
 #define NUM_OF_SUB_BANDS 3
 #define CAL_INT 10 //cal every 10 channels
 //variables used to calculate rssi
+uint8_t rssi_dec;
 int16_t rssi_dBm;
 uint8_t rssi_offset[NUM_OF_SUB_BANDS] ={74,74,74};
 
@@ -92,10 +93,10 @@ void loop() {
   lcd.write(tempBuf);
   lcd.write("dBm");
 
-  Serial.print(freq,4);
-  Serial.println("MHz: ");
-  Serial.print(highRSSI[activeBand]);
-  Serial.println("dBm" );
+  // Serial.print(freq,4);
+  // Serial.println("MHz: ");
+  // Serial.print(highRSSI[activeBand]);
+  // Serial.println("dBm" );
 
   //start jamming /* jamming will affect coming freq sweeping a lot!!!!! */
   // uint16_t jamChannel;
@@ -112,8 +113,10 @@ void loop() {
   lcd.setCursor(0,0);
   lcd.write("0 carrier sensed");
 
-  Serial.println("no carrier sensed");
+  // Serial.println("no carrier sensed");
  }
+ uint8_t syncWord[6]={128,128,128,128,128,128};
+ Serial.write(syncWord,6);
 
 }
 //send jamming
@@ -200,23 +203,18 @@ void scanFreq(void){
         // 1.4.9) enter IDLE state by issuing a SIDLE command
         cc1101.SpiStrobe(CC1101_SIDLE);
         // 1.4.10) check if CS is assearted
+        // //read rssi value and converto to dBm form
+        rssi_dec=(uint8_t)cc1101.SpiReadStatus(CC1101_RSSI);
+        rssi_dBm=calRSSI(rssi_dec,rssi_offset[subBand]);
+        //rssiData[subBand][channel]=rssi_dBm;
         if (pktStatus & 0x40){ //CS assearted
-          //read rssi value and converto to dBm form
-          rssi_dBm=calRSSI((uint8_t)cc1101.SpiReadStatus(CC1101_RSSI),rssi_offset[subBand]);
-          //rssiData[subBand][channel]=rssi_dBm;
           //store rssi value and corresponding channel number
           rssiTable[carrierSenseCounter]=rssi_dBm;
           channelNumber[carrierSenseCounter]=channel;
           carrierSenseCounter++;
-          #ifdef CC1101_DEBUG
-            Serial.println("carrier sensed!!!");
-          #endif
-        }
-        else{
-          rssi_dBm=MIN_DBM;
-          //rssiData[subBand][channel]=MIN_DBM;
         }
 
+        Serial.write(rssi_dec);//for external data processing
         #ifdef CC1101_DEBUG
           Serial.print("rssi_dBm:");
           Serial.println(rssi_dBm);
