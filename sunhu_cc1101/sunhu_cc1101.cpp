@@ -332,7 +332,7 @@ void sunhu_cc1101::RegConfigSettings(void)
     SpiWriteReg(CC1101_FSCAL0,   0x1F);
     SpiWriteReg(CC1101_TEST2,    0x81);
     SpiWriteReg(CC1101_TEST1,    0x35);
-    SpiWriteReg(CC1101_TEST0,    0x09);
+    SpiWriteReg(CC1101_TEST0,    0x0B); //should be 0x0B for lower than 430.6MHz and 0x09 for higher
 
     //SpiWriteReg(CC1101_FREND1,   0x56);
 

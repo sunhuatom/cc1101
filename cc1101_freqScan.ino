@@ -35,9 +35,8 @@ uint8_t carrierSenseCounter = 0;//counter used to keep track on how many CS has 
 
 //stop channel in each subband
 uint8_t lastChannel[NUM_OF_SUB_BANDS] ={255,255,255};
-
-//no change in TEST0
-
+//no change in TEST0 WHERE (430.6MHz) one should change from TEST0=0x0B to 0x09
+uint16_t limitTest0Reg[NUM_OF_SUB_BANDS]={256,180,0}; 
 //initialized to a value lower than the rssi threshold/ higher than channel number
 int16_t highRSSI[NUM_OF_SUB_BANDS] ={MIN_DBM,MIN_DBM,MIN_DBM};
 uint16_t selectedChannel[NUM_OF_SUB_BANDS] ={300,300,300} ;
@@ -184,8 +183,15 @@ void scanFreq(void){
         uint8_t pktStatus;
         //1.4.1) set channel register
         cc1101.SetChannel(channel);
-        //1.4.2) maybe set TEST0
-
+        //1.4.2)  set TEST0
+		if(channel==limitTest0Reg[subBand]){
+			//set test0 to 0x09
+			cc1101.SpiWriteReg(CC1101_TEST0,    0x09); 
+			//set FSCAL2 to 0x2A to force VCO HIGH
+			cc1101.SpiWriteReg(CC1101_FSCAL2,	0x2A);
+			//clear calCounter to invoke mannual calibration
+			calCounter=0;
+		}
         //1.4.3) calibrate every 1MHz
         if(calCounter++==0){
             //perform a manual calibration by issuing SCAL command
@@ -220,10 +226,6 @@ void scanFreq(void){
           Serial.print("rssi_dBm:");
           Serial.println(rssi_dBm);
         #endif
-
-        //bar display
-        /* int16_t tempdata[40]; */
-        /* barDisp(tempdata,MIN_DBM,STEP_DBM); */
 
         //LCD display
         // freq=base_freq[subBand]+0.1*channel;
