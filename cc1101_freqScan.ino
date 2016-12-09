@@ -167,6 +167,7 @@ void scanFreq(void){
 
   float freq;
 
+  cc1101.SpiWriteReg(CC1101_MDMCFG3,  0x3B);//trying the 250k baud
   cc1101.SpiWriteReg(CC1101_MCSM0,0x08);//disalbe FS_AUTOCAL
   cc1101.SpiWriteReg(CC1101_AGCCTRL2,0x43|0x0C);//MAX_DVGA_GAIN to 11 for fast rssi
   cc1101.SpiWriteReg(CC1101_AGCCTRL0,0xB0);//max AGC WAIT_TIME; 0 filter_length
