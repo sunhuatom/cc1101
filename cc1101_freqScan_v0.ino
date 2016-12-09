@@ -10,7 +10,7 @@
 
 #define MIN_DBM -120
 #define STEP_DBM 10
-#define RSSI_DELAY 500 //rssi delay in micro second
+#define RSSI_DELAY 600 //rssi delay in micro second
 #define NUM_OF_SUB_BANDS 3
 #define CAL_INT 10 //cal every 10 channels
 //variables used to calculate rssi
